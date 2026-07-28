@@ -82,7 +82,5 @@ Plumb Line is released under the [GNU General Public License v3.0 only](COPYING)
 
 Copyright (C) 2026 Chase Bleyl
 
-Contact: chase.bleyl@enterbridge.com
-
 Hardware assembly and manufacturing documentation is not part of this
 repository and is not covered by this license.
