@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (C) 2026 Chase Bleyl
+
 """Ports — the interfaces infrastructure adapters must satisfy.
 
 Structural typing via Protocol: adapters implement these by shape,

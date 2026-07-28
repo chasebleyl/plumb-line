@@ -74,3 +74,13 @@ is public from the start as defensive publication.
 
 "Plumb line": the thematic tie between green-reading (the plumb-bob method)
 and gravity-referenced IMU sensing.
+
+## License
+
+Plumb Line is released under the [GNU General Public License v3.0 only](COPYING)
+(GPL-3.0-only).
+
+Copyright (C) 2026 Chase Bleyl
+
+Hardware assembly and manufacturing documentation is not part of this
+repository and is not covered by this license.

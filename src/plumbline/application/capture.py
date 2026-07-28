@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (C) 2026 Chase Bleyl
+
 """Capture use case: stream samples from a source into a sink."""
 
 from plumbline.application.ports import SampleSink, SampleSource

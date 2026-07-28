@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (C) 2026 Chase Bleyl
+
 """CSV sink: writes ImuSamples to a CSV file for pandas analysis."""
 
 import csv
