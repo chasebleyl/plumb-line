@@ -1,3 +1,9 @@
+---
+paths:
+  - "**/*.py"
+  - "**/*.{c,h,cpp,ino}"
+---
+
 # SPDX License Headers
 
 Every source code file (`.py`, and any future firmware sources: `.c`, `.h`, `.cpp`, `.ino`, CircuitPython `.py`) must begin with the SPDX header, before any docstring or code:
