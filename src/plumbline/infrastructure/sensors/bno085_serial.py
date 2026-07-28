@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (C) 2026 Chase Bleyl
+
 """BNO085 adapter: parses the firmware's USB serial stream into ImuSamples.
 
 The Feather firmware (firmware/code.py) prints one raw reading per line.

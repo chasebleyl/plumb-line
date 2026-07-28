@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (C) 2026 Chase Bleyl
+
 """Core data types and the normalization contract they obey.
 
 Measurements are normalized from the sensor into these core types so the

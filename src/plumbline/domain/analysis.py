@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (C) 2026 Chase Bleyl
+
 """Pure analysis functions over core models.
 
 Euler angles (yaw/pitch/roll) are derived here at analysis time — never
