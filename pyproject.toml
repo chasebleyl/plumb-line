@@ -1,0 +1,21 @@
+[project]
+name = "plumbline"
+version = "0.1.0"
+description = "Putter-mounted stroke sensor: capture, log, and analyze putting strokes"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+capture = ["pyserial"]
+analysis = ["pandas", "matplotlib"]
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pyright]
+include = ["src", "tests"]
+extraPaths = ["src"]
