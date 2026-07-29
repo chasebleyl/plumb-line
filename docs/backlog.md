@@ -26,9 +26,28 @@ data.
 
 ### Outstanding
 
+Ordered by priority: items unblock the ones below them. The first two are
+independent (code vs hardware) and can run in parallel.
+
+- [ ] **Portability refactor** — bring `domain/` and `application/` into
+      compliance with the portability rule (architecture.md): drop
+      `dataclasses` from models, drop runtime `typing`/`Protocol` imports
+      from the inner layers; plain classes and functions that run under
+      both CPython and CircuitPython. First because it reshapes
+      `ImuSample`/models that every item below builds on — one-time
+      churn, smallest before more consumers exist
+- [ ] **Temporary capture jig** — repeatable mount on the putter grip so
+      captured data has a stable chip-to-body frame (decided 2026-07-29:
+      jig now, final enclosure mounting deferred). Gates the reference
+      dataset: captures without a stable frame can't be developed against
 - [ ] **Reference dataset** — capture real putting strokes (labeled
       sessions: known handedness, deliberate open/closed/square strokes,
-      varied tempo) to develop detection against
+      varied tempo) to develop detection against. Needs the jig
+- [ ] **CSV replay source** — `SampleSource` that replays a recorded CSV,
+      so detection work runs offline without hardware
+- [ ] **Analysis notebook/scripts** — pandas/matplotlib exploration of
+      recorded CSVs to prototype and sanity-check detection logic before
+      it hardens into `domain/analysis.py`
 - [ ] **Stroke segmentation** — detect a stroke in a sample stream and
       populate `Swing`/`SwingInterval` (address → backstroke → forward
       stroke → impact → follow-through). Phase-event definitions in
@@ -38,28 +57,25 @@ data.
 - [ ] **Stroke path analysis** — path direction at impact (formulas.md §3)
 - [ ] Face angle at impact — `face_angle_deg` exists; wire it to the
       detected impact sample rather than a hand-picked one
-- [ ] **Analysis notebook/scripts** — pandas/matplotlib exploration of
-      recorded CSVs to prototype and sanity-check the above before they
-      harden into `domain/analysis.py`
-- [ ] **CSV replay source** — `SampleSource` that replays a recorded CSV,
-      so detection work runs offline without hardware
 - [ ] Capture CLI entry point (port/outfile args) replacing the manual
-      wiring snippet in architecture.md
-- [ ] **Temporary capture jig** — repeatable mount on the putter grip so
-      captured data has a stable chip-to-body frame (decided 2026-07-29:
-      jig now, final enclosure mounting deferred)
-- [ ] Axis remap in the BNO085 adapter — stays identity until enclosure
-      mounting is final; face-angle sign convention verified against the
-      jig frame in the meantime
+      wiring snippet in architecture.md — convenience, any time
+- [ ] Axis remap in the BNO085 adapter — deliberately last: stays
+      identity until enclosure mounting is final; face-angle sign
+      convention verified against the jig frame in the meantime
 
 ## POC 2 — On-device compute + display
 
 Goal: crude rendering on the Feather's integrated TFT; prove computation
 and display happen entirely on-device, no dev machine in the loop.
 
-- [ ] Port `domain/` analysis to the device (decided 2026-07-29: POC 1
-      analysis code is written CircuitPython-portable — plain functions,
-      no `dataclasses`/`typing` in hot paths — so this is mostly a copy)
+- [ ] Deploy `domain/` + `application/` to the device — same source, no
+      port (the POC 1 portability refactor makes this a copy of files,
+      not a re-implementation)
+- [ ] **On-device BNO085 sensor adapter** — lift the firmware's raw SHTP
+      loop into `infrastructure/sensors/` as an on-device `SampleSource`;
+      `code.py` shrinks to the board-specific composition root. Axis
+      remap expressed as data (permutation/sign table) shared with the
+      laptop serial adapter, never two code paths
 - [ ] On-device stroke segmentation + metrics (tempo, face angle, path)
       within CircuitPython performance limits at 100 Hz
 - [ ] **Address/zero reference workflow on-device** (how the user marks
@@ -67,6 +83,10 @@ and display happen entirely on-device, no dev machine in the loop.
       Do this before TFT rendering: the device must recognize when it is
       "zeroed" so the ready-state visualization has a clear signal to
       fire on
+- [ ] **Results-side display port** — define the port a display adapter
+      consumes (per-stroke metrics + readiness states, not the raw sample
+      stream; architecture.md "Component interchange"). The Feather TFT
+      renderer below is its first adapter, in `infrastructure/displays/`
 - [ ] TFT rendering: readiness states + per-stroke summary screen (tempo,
       face angle, path). Readiness states — "calibrating" while the
       zero reference is being established, "ready for swing" once zeroed —
@@ -103,8 +123,16 @@ longer sessions.
 
 - **Mounting/axis remap:** capture POC 1 data with a temporary jig +
   identity remap; final enclosure mounting and remap deferred.
-- **POC 2 code reuse:** POC 1 analysis code is written
-  CircuitPython-portable so POC 2 ports rather than re-implements.
+- **POC 2 code reuse (amended 2026-07-29):** single shared
+  implementation — `domain/` and `application/` must satisfy the
+  portability rule (architecture.md) so POC 2 deploys the same source
+  rather than porting or re-implementing. Current code isn't compliant
+  yet (`dataclasses` in models, `Protocol` in ports); the POC 1
+  portability refactor closes that gap.
+- **Chip abstraction:** all chips targeted through MVP run
+  CircuitPython — the runtime is the chip-portability layer; per-board
+  differences live only in the `code.py` composition root
+  (architecture.md "Component interchange").
 - **POC metric scope:** tempo, face angle at impact, stroke path. Putter
   speed deferred to MVP (lever-arm/hosel caveats per formulas.md).
 - **POC 2 validation:** dual-output cross-check — device metrics vs
@@ -123,7 +151,13 @@ longer sessions.
 - Handedness configuration (POC hardcodes right-handed)
 
 - Component selection for purpose-built housing (POC parts expected to be
-  swapped, including the integrated-display Feather)
+  swapped, including the integrated-display Feather). Selection is
+  constrained to CircuitPython-capable chips (chip-abstraction decision
+  above); revisit the runtime choice only if performance or power forces
+  it — that would reopen the single-implementation question
+- Additional component adapters as selection demands (e.g. BNO055 sensor
+  source, SSD1306 OLED display) — one new `infrastructure/` module each,
+  no core changes (architecture.md "Component interchange")
 - Housing/enclosure industrial design (2" cube target)
 - Refined display metrics/visualizations for final hardware
 - Algorithm fine-tuning (accuracy targets in formulas.md §2/§3)
