@@ -10,6 +10,7 @@ dependencies = []
 [project.optional-dependencies]
 capture = ["pyserial"]
 analysis = ["pandas", "matplotlib"]
+dev = ["pytest"]
 
 [build-system]
 requires = ["setuptools>=77"]
