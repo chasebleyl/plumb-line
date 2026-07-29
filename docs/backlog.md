@@ -62,15 +62,21 @@ and display happen entirely on-device, no dev machine in the loop.
       no `dataclasses`/`typing` in hot paths — so this is mostly a copy)
 - [ ] On-device stroke segmentation + metrics (tempo, face angle, path)
       within CircuitPython performance limits at 100 Hz
-- [ ] TFT rendering: per-stroke summary screen (tempo, face angle, path)
+- [ ] **Address/zero reference workflow on-device** (how the user marks
+      address orientation before a stroke) — needed for face angle delta.
+      Do this before TFT rendering: the device must recognize when it is
+      "zeroed" so the ready-state visualization has a clear signal to
+      fire on
+- [ ] TFT rendering: readiness states + per-stroke summary screen (tempo,
+      face angle, path). Readiness states — "calibrating" while the
+      zero reference is being established, "ready for swing" once zeroed —
+      driven by the address/zero workflow above
 - [ ] Display update strategy that doesn't stall sampling (TFT writes cost
       ~100 ms; render only between strokes / when stationary)
 - [ ] Dual-output validation mode — keep USB streaming alive alongside
       on-device compute; cross-check device metrics against the laptop
       pipeline on the same strokes (decided 2026-07-29: POC 2 exit
       criterion)
-- [ ] Address/zero reference workflow on-device (how the user marks
-      address orientation before a stroke) — needed for face angle delta
 - [ ] Button interaction if needed (Feather has D0/D1/D2) — e.g.
       re-zero, next screen
 
@@ -105,11 +111,10 @@ longer sessions.
   laptop pipeline on the same strokes.
 - **Handedness:** POC assumes right-handed (`face_angle_deg` default);
   handedness configuration is an MVP concern.
-
-## Open questions (scope refinement)
-
-- **Q1 — Impact spot:** likely not measurable with a grip-mounted IMU
-  alone; declare out of scope (not merely deferred)?
+- **Impact spot:** out of scope for both POC and MVP — not measurable
+  with a grip-mounted IMU alone. Referenced in formulas.md only as
+  context (fourth MacKenzie variable, ~3% of direction variance); no
+  measurement section exists or is planned.
 
 ## Deferred to MVP
 
