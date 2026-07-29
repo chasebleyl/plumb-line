@@ -32,13 +32,33 @@ docs/                 Design + research notes
 
 ## Development approach
 
-Phased:
+Two core phases:
+
+### Proof of concept (POC)
+
+Core implementation on dev-friendly hardware: component integration,
+abstraction/normalization of the domain models (per the onion architecture),
+and initial establishment of the measurement formulas
+([docs/formulas.md](docs/formulas.md)). Milestones:
 
 1. **Tethered capture (current)** — USB-C serial streaming to a laptop;
    pyserial → CSV, with pandas/matplotlib analysis to prototype detection
    logic against recorded data. Blocked in part on finalizing enclosure
    mounting (the BNO085 adapter's axis remap depends on it).
-2. **Untethered** — SD-card logging on a real practice green.
+2. **On-device compute + display** — crude, unrefined rendering on the
+   Feather's integrated TFT; proves computation and display can happen
+   entirely on-device with no external dev machine in the loop.
+3. **Untethered capture** — SD-card logging on a real practice green, so
+   data dumps from longer sessions can be shared.
+
+### Minimum viable product (MVP)
+
+Everything on the device: sensor feeds the chip, the chip processes,
+metrics/visualizations render on the device display. Work: selecting
+components that fit a purpose-built housing (expect the POC parts, including
+the integrated-display Feather, to be swapped out), designing that housing,
+refactoring the display metrics/visualizations for the new hardware, and
+fine-tuning the algorithms.
 
 ## Research grounding
 
