@@ -3,17 +3,14 @@
 
 """Ports — the interfaces infrastructure adapters must satisfy.
 
-Structural typing via Protocol: adapters implement these by shape,
-no inheritance required.
+Duck-typed: adapters implement these by shape, no inheritance required.
+The classes here document the contract (plain classes, not
+typing.Protocol, per the portability rule in architecture.md — this
+module must run unchanged under CircuitPython).
 """
 
-from collections.abc import Iterator
-from typing import Protocol
 
-from plumbline.domain.models import ImuSample, SessionAnchor
-
-
-class SampleSource(Protocol):
+class SampleSource:
     """A source of normalized IMU samples (a sensor, a replay file, ...).
 
     Adapters own the sensor-specific work: unit conversion to SI,
@@ -22,18 +19,20 @@ class SampleSource(Protocol):
     plumbline.domain.models.
     """
 
-    def samples(self) -> Iterator[ImuSample]:
-        """Yield samples in timestamp order until the source is exhausted."""
-        ...
+    def samples(self):
+        """Yield ImuSample values in timestamp order until the source is exhausted."""
+        raise NotImplementedError
 
 
-class SampleSink(Protocol):
+class SampleSink:
     """A destination for normalized IMU samples (CSV file, live plot, ...)."""
 
-    def write_anchor(self, anchor: SessionAnchor) -> None:
+    def write_anchor(self, anchor):
         """Record the session's wall-clock anchor; called at most once, before any write."""
-        ...
+        raise NotImplementedError
 
-    def write(self, sample: ImuSample) -> None: ...
+    def write(self, sample):
+        raise NotImplementedError
 
-    def close(self) -> None: ...
+    def close(self):
+        raise NotImplementedError

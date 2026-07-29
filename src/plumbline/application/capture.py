@@ -4,23 +4,23 @@
 """Capture use case: stream samples from a source into a sink."""
 
 import time
-from collections.abc import Callable
 
-from plumbline.application.ports import SampleSink, SampleSource
 from plumbline.domain.models import SessionAnchor
 
 
-def run_capture(
-    source: SampleSource,
-    sink: SampleSink,
-    clock: Callable[[], int] = time.time_ns,
-) -> int:
-    """Drain source into sink. Returns the number of samples captured.
+def run_capture(source, sink, clock=None) -> int:
+    """Drain a SampleSource into a SampleSink. Returns the number of samples captured.
 
     On the first sample, pairs the wall clock with the sample's board
     timestamp and records it via sink.write_anchor (contract item 4:
     wall-clock is session-level metadata, once per capture file).
+
+    clock is a zero-arg callable returning integer nanoseconds; defaults
+    to time.time_ns, resolved lazily because CircuitPython lacks it — the
+    on-device composition root must pass its own clock.
     """
+    if clock is None:
+        clock = time.time_ns
     count = 0
     try:
         samples = iter(source.samples())

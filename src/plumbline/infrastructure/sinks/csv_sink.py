@@ -8,7 +8,6 @@ the CSV header; read the file with ``pandas.read_csv(path, comment="#")``.
 """
 
 import csv
-from dataclasses import asdict, fields
 from typing import IO
 
 from plumbline.domain.models import ImuSample, SessionAnchor
@@ -19,7 +18,7 @@ class CsvSink:
 
     def __init__(self, file: IO[str]) -> None:
         self._file = file
-        self._writer = csv.DictWriter(file, fieldnames=[f.name for f in fields(ImuSample)])
+        self._writer = csv.DictWriter(file, fieldnames=list(ImuSample.FIELDS))
         self._header_written = False
 
     def write_anchor(self, anchor: SessionAnchor) -> None:
@@ -32,7 +31,7 @@ class CsvSink:
         if not self._header_written:
             self._writer.writeheader()
             self._header_written = True
-        self._writer.writerow(asdict(sample))
+        self._writer.writerow({name: getattr(sample, name) for name in ImuSample.FIELDS})
 
     def close(self) -> None:
         if not self._header_written:
