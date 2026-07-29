@@ -3,16 +3,35 @@
 
 """Capture use case: stream samples from a source into a sink."""
 
+import time
+from collections.abc import Callable
+
 from plumbline.application.ports import SampleSink, SampleSource
+from plumbline.domain.models import SessionAnchor
 
 
-def run_capture(source: SampleSource, sink: SampleSink) -> int:
-    """Drain source into sink. Returns the number of samples captured."""
+def run_capture(
+    source: SampleSource,
+    sink: SampleSink,
+    clock: Callable[[], int] = time.time_ns,
+) -> int:
+    """Drain source into sink. Returns the number of samples captured.
+
+    On the first sample, pairs the wall clock with the sample's board
+    timestamp and records it via sink.write_anchor (contract item 4:
+    wall-clock is session-level metadata, once per capture file).
+    """
     count = 0
     try:
-        for sample in source.samples():
-            sink.write(sample)
-            count += 1
+        samples = iter(source.samples())
+        first = next(samples, None)
+        if first is not None:
+            sink.write_anchor(SessionAnchor(clock(), first.timestamp_ns))
+            sink.write(first)
+            count = 1
+            for sample in samples:
+                sink.write(sample)
+                count += 1
     finally:
         sink.close()
     return count

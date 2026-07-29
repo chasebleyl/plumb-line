@@ -44,6 +44,19 @@ from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True)
+class SessionAnchor:
+    """Session-level wall-clock metadata (contract item 4), one per capture file.
+
+    Pairs the laptop wall clock with the board's monotonic clock at the
+    moment the first sample of a session arrives, so any sample's wall-clock
+    time can be recovered as wall_time_ns + (timestamp_ns - anchor_timestamp_ns).
+    """
+
+    wall_time_ns: int  # laptop time.time_ns() at first-sample receipt
+    anchor_timestamp_ns: int  # that first sample's board-monotonic timestamp_ns
+
+
+@dataclass(frozen=True)
 class ImuSample:
     """One normalized IMU reading. Sensor-agnostic.
 

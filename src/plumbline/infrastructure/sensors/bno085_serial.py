@@ -16,7 +16,7 @@ This adapter owns everything BNO085-specific:
   linear acceleration); quaternion i,j,k,real maps directly to x,y,z,w
 """
 
-from collections.abc import Iterator
+from collections.abc import Iterable, Iterator
 
 import serial
 
@@ -52,11 +52,30 @@ def parse_line(line: str) -> ImuSample | None:
     )
 
 
+def _iter_samples(lines: Iterable[str]) -> Iterator[ImuSample]:
+    """Yield parsed samples from decoded lines, skipping noise.
+
+    Ends the stream when a timestamp goes backwards: the board's monotonic
+    clock restarts near zero on reset, so a backwards jump means the board
+    rebooted mid-capture and later samples belong to a new session.
+    """
+    last_t_ns = None
+    for line in lines:
+        sample = parse_line(line)
+        if sample is None:
+            continue
+        if last_t_ns is not None and sample.timestamp_ns < last_t_ns:
+            return
+        last_t_ns = sample.timestamp_ns
+        yield sample
+
+
 class Bno085SerialSource:
     """SampleSource over a pyserial connection to the Feather.
 
     The stream is treated as exhausted when the port goes silent for
-    read_timeout_s (board unplugged or firmware stopped); the tethered
+    read_timeout_s (board unplugged or firmware stopped) or when a
+    timestamp goes backwards (board reset mid-capture); the tethered
     firmware otherwise prints continuously.
     """
 
@@ -67,10 +86,6 @@ class Bno085SerialSource:
 
     def samples(self) -> Iterator[ImuSample]:
         with serial.Serial(self.port, self.baudrate, timeout=self.read_timeout_s) as ser:
-            while True:
-                raw = ser.readline()
-                if not raw:
-                    return
-                sample = parse_line(raw.decode("ascii", errors="replace").strip())
-                if sample is not None:
-                    yield sample
+            raw_lines = iter(ser.readline, b"")
+            lines = (raw.decode("ascii", errors="replace").strip() for raw in raw_lines)
+            yield from _iter_samples(lines)
