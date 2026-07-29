@@ -20,13 +20,20 @@ aid (avoiding USGA tournament-use concerns).
 ## Repo layout
 
 ```
-src/plumbline/        Laptop-side package (onion architecture; see docs/architecture.md)
+src/plumbline/        The plumbline package (onion architecture; see
+                      docs/architecture.md). Runs on the laptop during POC 1;
+                      from POC 2 onward the same package runs on the chip —
+                      the device is the target install.
   domain/             Pure core: models + analysis. The normalization contract
-                      lives in the models.py module docstring. Stdlib only.
+                      lives in the models.py module docstring.
+                      CircuitPython-safe stdlib subset only.
   application/        Use cases + ports (SampleSource, SampleSink)
-  infrastructure/     Adapters: BNO085 serial source, CSV sink
-firmware/             CircuitPython for the Feather — dumb peripheral, prints
-                      one raw reading per line over USB serial
+  infrastructure/     Adapters: sensors, displays, sinks. Platform-specific
+                      leaves; currently BNO085 serial source, CSV sink
+firmware/             CircuitPython for the Feather — POC 1 tethered-capture
+                      scaffold: dumb peripheral printing one raw reading per
+                      line over USB serial. Its sensor loop becomes the
+                      on-device sensor adapter from POC 2
 docs/                 Design + research notes
 ```
 
