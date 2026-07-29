@@ -51,14 +51,6 @@ PuttLab PGA Tour data and Grober's resonance model, which independently
 converge on a ~2:1 backswing:downswing ratio. See
 [docs/formulas.md](docs/formulas.md) for the full, verified reference.
 
-## Commercialization vision
-
-Hobby-scale, explicitly not a serious venture — modeled on comma.ai's
-openpilot: the algorithm is open source, with pre-assembled plug-and-play
-hardware units sold just-in-time for people who don't want to source, print,
-and assemble their own. The moat is convenience and support, not IP. The repo
-is public from the start as defensive publication.
-
 ## Name
 
 "Plumb line": the thematic tie between green-reading (the plumb-bob method)
