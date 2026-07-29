@@ -10,7 +10,7 @@ no inheritance required.
 from collections.abc import Iterator
 from typing import Protocol
 
-from plumbline.domain.models import ImuSample
+from plumbline.domain.models import ImuSample, SessionAnchor
 
 
 class SampleSource(Protocol):
@@ -29,6 +29,10 @@ class SampleSource(Protocol):
 
 class SampleSink(Protocol):
     """A destination for normalized IMU samples (CSV file, live plot, ...)."""
+
+    def write_anchor(self, anchor: SessionAnchor) -> None:
+        """Record the session's wall-clock anchor; called at most once, before any write."""
+        ...
 
     def write(self, sample: ImuSample) -> None: ...
 

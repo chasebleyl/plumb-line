@@ -4,9 +4,14 @@
 """Parser tests for the BNO085 serial adapter, using real line shapes
 captured from the firmware stream (see docs/setup.md)."""
 
-from plumbline.infrastructure.sensors.bno085_serial import parse_line
+from plumbline.infrastructure.sensors.bno085_serial import _iter_samples, parse_line
 
 VALID = "1663843566905,-0.995728,-0.088928,-0.022217,0.011780,-0.003906,-0.003906,0.001953,0.000000,0.003906,0.000000"
+
+
+def _line(t_ns: int) -> str:
+    """A VALID data line with the timestamp replaced."""
+    return f"{t_ns}," + VALID.split(",", 1)[1]
 
 
 def test_valid_line_parses_all_fields():
@@ -41,3 +46,24 @@ def test_wrong_field_count_is_skipped():
 def test_non_numeric_fields_are_skipped():
     assert parse_line("abc," + VALID.split(",", 1)[1]) is None
     assert parse_line(VALID.replace("0.011780", "nope")) is None
+
+
+def test_iter_samples_yields_valid_lines_in_order():
+    samples = list(_iter_samples([_line(100), _line(200), _line(300)]))
+    assert [s.timestamp_ns for s in samples] == [100, 200, 300]
+
+
+def test_iter_samples_skips_noise_between_valid_lines():
+    samples = list(_iter_samples([_line(100), "code.py output:", "", _line(200)]))
+    assert [s.timestamp_ns for s in samples] == [100, 200]
+
+
+def test_iter_samples_stops_on_backwards_timestamp():
+    # board reset mid-capture: monotonic clock restarts near zero
+    samples = list(_iter_samples([_line(100), _line(200), _line(5), _line(300)]))
+    assert [s.timestamp_ns for s in samples] == [100, 200]
+
+
+def test_iter_samples_does_not_stop_on_equal_timestamp():
+    samples = list(_iter_samples([_line(100), _line(100), _line(200)]))
+    assert [s.timestamp_ns for s in samples] == [100, 100, 200]
