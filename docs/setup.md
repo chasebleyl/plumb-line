@@ -59,15 +59,23 @@ Phase 1 uses only the first three rows; everything else stays boxed.
 
 ## Current Status
 
-**Full pipeline working** (validated 2026-07-28): all channels stream
-over COM7 at ~10–11 Hz and land in normalized CSVs; quaternion norm
-1.0, monotonic timestamps, gyro/accel respond to motion and settle at
-rest.
+**Full pipeline working at 100 Hz** (validated 2026-07-28): all channels
+stream over COM7 at a steady ~10 ms cadence (wiggle test: 99.9 Hz fresh
+quaternion/gyro, 96 Hz fresh accel, max gap 16 ms) and land in normalized
+CSVs; quaternion norm 1.0, monotonic timestamps, gyro/accel respond to
+motion and settle at rest.
+
+Getting there required three firmware changes (all in
+[firmware/code.py](../firmware/code.py)): blank the TFT console mirror
+(scrolling it cost ~100 ms per printed line), request 10 ms report
+intervals directly via the SH-2 Set Feature Command (the bundled driver
+hardcodes 50 ms), and replace the driver's steady-state packet processing
+with a raw SHTP read loop at 400 kHz I2C — the adafruit_bno08x driver
+tops out near 150 reports/s and collapses above that, and three features
+at 100 Hz is 300 reports/s. One line prints per fresh rotation-vector
+report, so there are no stale-duplicate lines to filter laptop-side.
 
 ## Open Items
 
-- **Sample rate** — ~10–11 Hz print rate and only ~7–8 Hz fresh data vs
-  ~100 Hz wanted for stroke capture; details and candidates in
-  [TODOS.md](../TODOS.md).
 - **Axis remap** — identity in the adapter until enclosure mounting is
   decided.
