@@ -1,7 +1,6 @@
 # TODOs
 
-Prioritized backlog. Context and measurements for hardware items live in
-[docs/setup.md](docs/setup.md).
+Prioritized backlog.
 
 ## CRITICAL
 
@@ -15,6 +14,14 @@ Prioritized backlog. Context and measurements for hardware items live in
   rate, evaluate the BNO085's UART-RVC mode.
 
 ## MEDIUM
+
+- **Implement session-anchor timestamping in the capture path** — decided
+  2026-07-28: pair laptop `time.time_ns()` with the first sample's `t_ns`,
+  stored as per-file session metadata, per the models.py contract
+  ("wall-clock is session-level metadata recorded once per capture
+  file"). Phase 2 (untethered) will instead stamp wall-clock in firmware
+  from the Adalogger's PCF8523 RTC. Include hardening: treat `t_ns`
+  going backwards (board reset mid-capture) as end-of-stream.
 
 - **Print only fresh reports in `firmware/code.py`** — ~50% of streamed
   lines are stale duplicates and the cadence is bimodal (<10 ms bursts /

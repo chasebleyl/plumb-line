@@ -71,8 +71,3 @@ rest.
   [TODOS.md](../TODOS.md).
 - **Axis remap** — identity in the adapter until enclosure mounting is
   decided.
-- **Timestamping** — decided: laptop pairs `time.time_ns()` with the
-  first sample's `t_ns` as per-file session metadata (Phase 1);
-  Adalogger's PCF8523 RTC stamps wall-clock in firmware (Phase 2).
-  Implementation pending, incl. treating `t_ns` going backwards (board
-  reset mid-capture) as end-of-stream.
