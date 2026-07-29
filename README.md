@@ -30,17 +30,6 @@ firmware/             CircuitPython for the Feather — dumb peripheral, prints
 docs/                 Design + research notes
 ```
 
-## Docs
-
-- [architecture.md](docs/architecture.md) — onion layers, import rules, wiring
-- [formulas.md](docs/formulas.md) — measurement formulas for tempo, face angle
-  at impact, and stroke path, with citations; each section independently
-  verified against primary sources
-- [metrics.md](docs/metrics.md) — survey of the putting-metric space (six
-  categories) with research quotes
-- [direction.md](docs/direction.md), [speed.md](docs/speed.md) — candidate
-  metric lists per outcome dimension
-
 ## Development approach
 
 Phased:
