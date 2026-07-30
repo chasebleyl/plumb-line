@@ -28,8 +28,9 @@ src/plumbline/        The plumbline package (onion architecture; see
                       lives in the models.py module docstring.
                       CircuitPython-safe stdlib subset only.
   application/        Use cases + ports (SampleSource, SampleSink)
-  infrastructure/     Adapters: sensors, displays, sinks. Platform-specific
-                      leaves; currently BNO085 serial source, CSV sink
+  infrastructure/     Adapters: sensors, sources, displays, sinks. Platform-
+                      specific leaves; currently BNO085 serial source, CSV
+                      replay source, CSV sink
 firmware/             CircuitPython for the Feather — POC 1 tethered-capture
                       scaffold: dumb peripheral printing one raw reading per
                       line over USB serial. Its sensor loop becomes the
