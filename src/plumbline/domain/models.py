@@ -38,12 +38,12 @@ Orientation is stored ONLY as a quaternion. Yaw/pitch/roll (Euler angles)
 are derived at analysis/display time (see analysis.py) — never stored,
 because Euler angles have 24 ambiguous conventions and hit gimbal lock
 near ±90° pitch (a putter shaft pointed upward sits exactly there).
+
+Plain classes, not dataclasses: this module must run unchanged under
+CircuitPython (architecture.md "Portability rule").
 """
 
-from dataclasses import dataclass, field
 
-
-@dataclass(frozen=True)
 class SessionAnchor:
     """Session-level wall-clock metadata (contract item 4), one per capture file.
 
@@ -52,11 +52,21 @@ class SessionAnchor:
     time can be recovered as wall_time_ns + (timestamp_ns - anchor_timestamp_ns).
     """
 
-    wall_time_ns: int  # laptop time.time_ns() at first-sample receipt
-    anchor_timestamp_ns: int  # that first sample's board-monotonic timestamp_ns
+    def __init__(self, wall_time_ns: int, anchor_timestamp_ns: int):
+        self.wall_time_ns = wall_time_ns  # laptop time.time_ns() at first-sample receipt
+        self.anchor_timestamp_ns = anchor_timestamp_ns  # that sample's board-monotonic timestamp_ns
+
+    def __eq__(self, other):
+        return (
+            isinstance(other, SessionAnchor)
+            and self.wall_time_ns == other.wall_time_ns
+            and self.anchor_timestamp_ns == other.anchor_timestamp_ns
+        )
+
+    def __repr__(self):
+        return f"SessionAnchor(wall_time_ns={self.wall_time_ns}, anchor_timestamp_ns={self.anchor_timestamp_ns})"
 
 
-@dataclass(frozen=True)
 class ImuSample:
     """One normalized IMU reading. Sensor-agnostic.
 
@@ -67,37 +77,97 @@ class ImuSample:
     - Acceleration is gravity-removed (linear acceleration)
     """
 
-    timestamp_ns: int
-    q_x: float
-    q_y: float
-    q_z: float
-    q_w: float
-    gyro_x: float
-    gyro_y: float
-    gyro_z: float
-    accel_x: float
-    accel_y: float
-    accel_z: float
+    # Attribute names in constructor order; sinks rely on this for row layout.
+    FIELDS = (
+        "timestamp_ns",
+        "q_x",
+        "q_y",
+        "q_z",
+        "q_w",
+        "gyro_x",
+        "gyro_y",
+        "gyro_z",
+        "accel_x",
+        "accel_y",
+        "accel_z",
+    )
+
+    def __init__(
+        self,
+        timestamp_ns: int,
+        q_x: float,
+        q_y: float,
+        q_z: float,
+        q_w: float,
+        gyro_x: float,
+        gyro_y: float,
+        gyro_z: float,
+        accel_x: float,
+        accel_y: float,
+        accel_z: float,
+    ):
+        self.timestamp_ns = timestamp_ns
+        self.q_x = q_x
+        self.q_y = q_y
+        self.q_z = q_z
+        self.q_w = q_w
+        self.gyro_x = gyro_x
+        self.gyro_y = gyro_y
+        self.gyro_z = gyro_z
+        self.accel_x = accel_x
+        self.accel_y = accel_y
+        self.accel_z = accel_z
+
+    def __eq__(self, other):
+        if not isinstance(other, ImuSample):
+            return NotImplemented
+        return all(getattr(self, name) == getattr(other, name) for name in self.FIELDS)
+
+    def __repr__(self):
+        args = ", ".join(f"{name}={getattr(self, name)!r}" for name in self.FIELDS)
+        return f"ImuSample({args})"
 
 
-@dataclass
 class SwingInterval:
     """Starting & ending data over a time segment."""
 
-    start_sample: ImuSample
-    end_sample: ImuSample
-    elapsed_time_ms: float
-    intermediary_samples: list[ImuSample] = field(default_factory=list)
+    def __init__(
+        self,
+        start_sample: ImuSample,
+        end_sample: ImuSample,
+        elapsed_time_ms: float,
+        intermediary_samples=None,
+    ):
+        self.start_sample = start_sample
+        self.end_sample = end_sample
+        self.elapsed_time_ms = elapsed_time_ms
+        self.intermediary_samples = [] if intermediary_samples is None else intermediary_samples
+
+    def __repr__(self):
+        return (
+            f"SwingInterval(start_sample={self.start_sample!r}, end_sample={self.end_sample!r}, "
+            f"elapsed_time_ms={self.elapsed_time_ms!r}, "
+            f"intermediary_samples={self.intermediary_samples!r})"
+        )
 
 
-@dataclass
 class Swing:
     """Encapsulation of all data pertaining to a single Swing motion."""
 
-    start_sample: ImuSample
-    interval_stationary: SwingInterval
-    interval_backstroke: SwingInterval
-    interval_forwardstroke: SwingInterval
-    interval_impact: SwingInterval
-    interval_follow_through: SwingInterval
-    end_sample: ImuSample
+    def __init__(
+        self,
+        start_sample: ImuSample,
+        interval_stationary: SwingInterval,
+        interval_backstroke: SwingInterval,
+        interval_forwardstroke: SwingInterval,
+        interval_impact: SwingInterval,
+        interval_follow_through: SwingInterval,
+        end_sample: ImuSample,
+    ):
+        self.start_sample = start_sample
+        self.interval_stationary = interval_stationary
+        self.interval_backstroke = interval_backstroke
+        self.interval_forwardstroke = interval_forwardstroke
+        self.interval_impact = interval_impact
+        self.interval_follow_through = interval_follow_through
+        self.end_sample = end_sample

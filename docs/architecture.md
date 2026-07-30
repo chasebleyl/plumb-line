@@ -103,9 +103,11 @@ composition root.
 This is the rule that keeps the codebase a single implementation instead
 of a laptop version and a device port drifting apart.
 
-> Status: `domain/models.py` currently uses `dataclasses` and
-> `application/ports.py` uses `typing.Protocol`; bringing them into
-> compliance is tracked in the backlog (pre-POC 2).
+> Status: compliant as of the POC 1 portability refactor — plain classes
+> in `domain/models.py`, duck-typed port classes in
+> `application/ports.py`, and `run_capture` resolves its default clock
+> lazily (CircuitPython lacks `time.time_ns`; the on-device composition
+> root passes its own clock).
 
 ## Development topology (POC 1, tethered)
 
