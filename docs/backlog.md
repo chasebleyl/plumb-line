@@ -23,19 +23,18 @@ data.
       ([formulas.md](formulas.md)): tempo, face angle at impact, stroke path
 - [x] Parser/capture/sink unit tests
 - [x] End-to-end validation at 100 Hz (2026-07-28 wiggle test)
+- [x] Portability refactor — `domain/` and `application/` comply with the
+      portability rule (architecture.md): plain classes, no `dataclasses`
+      or runtime `typing`/`Protocol` imports in the inner layers; same
+      source runs under CPython and CircuitPython
+- [x] CSV replay source — `CsvReplaySource` replays a recorded capture
+      CSV as a `SampleSource`, so detection work runs offline without
+      hardware
 
 ### Outstanding
 
-Ordered by priority: items unblock the ones below them. The first two are
-independent (code vs hardware) and can run in parallel.
+Ordered by priority: items unblock the ones below them.
 
-- [ ] **Portability refactor** — bring `domain/` and `application/` into
-      compliance with the portability rule (architecture.md): drop
-      `dataclasses` from models, drop runtime `typing`/`Protocol` imports
-      from the inner layers; plain classes and functions that run under
-      both CPython and CircuitPython. First because it reshapes
-      `ImuSample`/models that every item below builds on — one-time
-      churn, smallest before more consumers exist
 - [ ] **Temporary capture jig** — repeatable mount on the putter grip so
       captured data has a stable chip-to-body frame (decided 2026-07-29:
       jig now, final enclosure mounting deferred). Gates the reference
@@ -43,8 +42,6 @@ independent (code vs hardware) and can run in parallel.
 - [ ] **Reference dataset** — capture real putting strokes (labeled
       sessions: known handedness, deliberate open/closed/square strokes,
       varied tempo) to develop detection against. Needs the jig
-- [ ] **CSV replay source** — `SampleSource` that replays a recorded CSV,
-      so detection work runs offline without hardware
 - [ ] **Analysis notebook/scripts** — pandas/matplotlib exploration of
       recorded CSVs to prototype and sanity-check detection logic before
       it hardens into `domain/analysis.py`
@@ -126,9 +123,8 @@ longer sessions.
 - **POC 2 code reuse (amended 2026-07-29):** single shared
   implementation — `domain/` and `application/` must satisfy the
   portability rule (architecture.md) so POC 2 deploys the same source
-  rather than porting or re-implementing. Current code isn't compliant
-  yet (`dataclasses` in models, `Protocol` in ports); the POC 1
-  portability refactor closes that gap.
+  rather than porting or re-implementing. The POC 1 portability
+  refactor closed that gap (2026-07-30).
 - **Chip abstraction:** all chips targeted through MVP run
   CircuitPython — the runtime is the chip-portability layer; per-board
   differences live only in the `code.py` composition root
