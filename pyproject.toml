@@ -21,4 +21,4 @@ where = ["src"]
 
 [tool.pyright]
 include = ["src", "tests"]
-extraPaths = ["src"]
+extraPaths = ["src", "firmware"]
